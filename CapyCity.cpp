@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <regex>
 using namespace std;
 
 void menu();
@@ -7,9 +8,15 @@ enum building { Empty = 0, Water = 1, Wind = 2, Solar = 3 };
 void buildingPlan();
 void deleteArea();
 void buildBuilding();
+int posX();
+int posY();
+int buildingWidth();
+int buildingLength();
 
 int length;
 int width;
+regex menuCheck("[1-4]");
+regex numberCheck("[[:digit:]]+");
 
 building** Area;
 
@@ -28,15 +35,13 @@ int main(int argc, char **argv) {
         }
     }
 
-
     while (true) {
         menu();
     }
 }
 
-
 void menu(){
-    int choice;
+    string choice;
 
     cout << endl
         << "1 - Gebaeude setzen\n"
@@ -46,30 +51,39 @@ void menu(){
 
     cin >> choice;
 
-    switch (choice) {
-    case 1:
-        //Gebäude setzen    
-        buildBuilding();
-        break;
-    case 2:
-        //Bereich löschen
-        deleteArea();
-        break;
-    case 3:
-        //Print Blauplan
-        buildingPlan();
-        break;
+    if (regex_match(choice, menuCheck)) {
+        switch (stoi(choice)) {
+        case 1:
+            //Gebäude setzen    
+            buildBuilding();
+            break;
+        case 2:
+            //Bereich löschen
+            deleteArea();
+            break;
+        case 3:
+            //Print Blauplan
+            buildingPlan();
+            break;
 
-    case 4:
-        //Beenden des Programms
-        cout << "Bye Bye";
-        exit(0);
+        case 4:
+            //Beenden des Programms
+            cout << "Bye Bye";
+            exit(0);
+        }
     }
+    else {
+        cout << "Nur Zahlen von 1 - 4 erlaubt!\n";
+        menu();
+    } 
+    //while (check(choice) || choice <= 0 || choice > 4) {
+    //    cout << "Falsche Eingabe!\nBitte nur Zahlen von 1 bis 4 eingeben: \n";
+    //    cin >> choice;
+    //}   
 }
 
-
 building buildingMenu() {
-    int buildingChoice;
+    string buildingChoice;
 
     cout << "Welches Gebaeude soll gebaut werden?";
 
@@ -80,88 +94,102 @@ building buildingMenu() {
         << "4 - Zurueck zum Hauptmenue\n";
     cin >> buildingChoice;
 
-    switch (buildingChoice) {
-    case 1:
-        return Water;
-        break;
-    case 2:
-        return Wind;
-        break;
-    case 3:
-        return Solar;
-        break;
-    case 4:
-        menu();
+    if (regex_match(buildingChoice, menuCheck)) {
+        switch (stoi(buildingChoice)) {
+        case 1:
+            return Water;
+            break;
+        case 2:
+            return Wind;
+            break;
+        case 3:
+            return Solar;
+            break;
+        case 4:
+            menu();
+        }
+    }
+    else {
+        cout << "Nur Zahlen von 1 - 4 erlaubt!\n";
+        buildingMenu();
     }
 }
 
 void buildBuilding() {
     building buildingChoice = buildingMenu();
 
-    int startX;
-    int startY;
-    int breite;
-    int laenge;
-
-    while (true) {
-        cout << "X Position eingeben: \n";
-        cin >> startX;
-        if (startX >= 0 && startX < length) {
-            break;
-        }
-        else {
-            cout << "Zahl zwischen 0 und " << (length - 1) << " eingeben" << endl;
-        }
-    }
-
-    while (true) {
-        cout << "Y Position eingeben: \n";
-        cin >> startY;
-        if (startY >= 0 && startY < width) {
-            break;
-        }
-        else {
-            cout << "Zahl zwischen 0 und " << (width - 1) << " eingeben" << endl;
-        }
-    }
-
-    while (true) {
-        cout << "Wie breit soll das Gebaeude sein: \n";
-        cin >> breite;
-        if (breite > 0 && breite <= width) {
-            break;
-        }
-        else {
-            cout << "Breite kann nicht 0 oder groesser als das Baufeld sein!\n";
-        }
-    }
-
-    while (true) {
-        cout << "Wie lang soll das Gebaeude sein: \n";
-        cin >> laenge;
-        if (laenge > 0 && laenge <= length) {
-            break;
-        }
-        else {
-            cout << "Laenge kann nicht 0 oder groesser als das Baufeld sein!\n";
-        }
-    }
+    int startX{ posX() };
+    int startY{ posY() };
+    int breite{ buildingWidth() };
+    int laenge{ buildingLength() };
 
     for (int i = startX; i < startX + breite; i++) {
-        for (int j = startY; j < laenge; j++) {
-            if (Area[i][j] != Empty) {
-                cout << "Flaeche schon belegt oder ausserhalb des Baubereichs!\n";
+        for (int j = startY; j < startY + laenge; j++) {
+            if ((startX + breite) > width || (startY + laenge) > length || Area[j][i] != Empty) {
+                cout << "Flaeche schon belegt oder ausserhalb des Baubereichs!\n\n";
                 return buildBuilding();
+            }
+            else {
+                Area[j][i] = buildingChoice;
             }
         }
     }
+}
 
-    for (int i = startX; i < startX + breite; i++) {
-        for (int j = startY; j < laenge; j++) {
-            Area[i][j] = buildingChoice;
-        }
+int posX() {
+    string startX;
+
+    cout << "X Position eingeben: \n";
+    cin >> startX;
+    if (regex_match(startX, numberCheck) && stoi(startX)<length) {
+        return stoi(startX);
     }
+    else {
+        cout << "Zahl zwischen 0 und " << (length - 1) << " eingeben\n";
+        posX();
+    }
+}
 
+int posY() {
+    string startY;
+
+    cout << "Y Position eingeben: \n";
+    cin >> startY;
+    if (regex_match(startY, numberCheck) && stoi(startY) < width) {
+        return stoi(startY);
+    }
+    else {
+        cout << "Zahl zwischen 0 und " << (width - 1) << " eingeben\n";
+        posY();
+    }
+}
+
+int buildingWidth() {
+    string breite;
+
+    cout << "Wie breit soll die Flaeche sein: \n";
+    cin >> breite;
+    if (regex_match(breite, numberCheck) && stoi(breite) > 0 && stoi(breite) <= width) {
+        return stoi(breite);
+    }
+    else {
+        cout << "Die Breite muss eine Zahl zwischen 1 und " << width << " sein!\n";
+        buildingWidth();
+    }
+}
+
+int buildingLength() {
+    string laenge;
+
+    cout << "Wie lang soll die Flaeche sein: \n";
+    cin >> laenge;
+    if (regex_match(laenge, numberCheck) && stoi(laenge) > 0 && stoi(laenge) <= length) {
+        return stoi(laenge);
+    }
+    else {
+        cout << "Die Laenge muss eine Zahl zwischen 1 und " << length << " sein!\n";
+        buildingLength();
+    }
 }
 
 void buildingPlan() {
@@ -171,47 +199,19 @@ void buildingPlan() {
         }
         cout << endl;
     }
+    menu();
 }
 
 void deleteArea() {
-    int startX;
-    int startY;
-    int breite;
-    int laenge;
-
-    while (true) {
-        cout << "X Position eingeben: \n";
-        cin >> startX;
-        if (0 <= startX && startX < length) {
-            break;
-        }
-        else {
-            cout << "Zahl zwischen 0 und " << (length - 1) << " eingeben" << endl;
-        }
-    }
-
-    while (true) {
-        cout << "Y Position eingeben: \n";
-        cin >> startY;
-        if (0 <= startY && startY < width) {
-            break;
-        }
-        else {
-            cout << "Zahl zwischen 0 und " << (width - 1) << " eingeben" << endl;
-        }
-    }
-
-
-    cout << "Wie breit soll die gelöschte Fläche sein: \n";
-    cin >> breite;
-
-    cout << "Wie lang soll die gelöschte Fläche sein: \n";
-    cin >> laenge;
+    int startX{ posX() };
+    int startY{ posY() };
+    int breite{ buildingWidth() };
+    int laenge{ buildingLength() };
 
     for (int i = startX; i < startX + breite; i++) {
-        for (int j = startY; j < laenge; j++) {
-            Area[i][j] = Empty;
+        for (int j = startY; j < startY + laenge; j++) {
+            Area[j][i] = Empty;
         }
     }
-
+    menu();
 }
