@@ -76,10 +76,6 @@ void menu(){
         cout << "Nur Zahlen von 1 - 4 erlaubt!\n";
         menu();
     } 
-    //while (check(choice) || choice <= 0 || choice > 4) {
-    //    cout << "Falsche Eingabe!\nBitte nur Zahlen von 1 bis 4 eingeben: \n";
-    //    cin >> choice;
-    //}   
 }
 
 building buildingMenu() {
