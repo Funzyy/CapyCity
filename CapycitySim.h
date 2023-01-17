@@ -5,9 +5,9 @@ using namespace std;
 int length;
 int width;
 string choice;
-regex planMenuCheck("[1-3]");
+regex planMenuCheck("[1-4]");
 regex buildingCheck("[1-4]");
-regex menuCheck("[1-5]");
+regex menuCheck("[1-6]");
 regex numberCheck("[[:digit:]]+");
 
 class Building {
@@ -128,4 +128,5 @@ public:
 	int buildingLength();
 	void buildingPlan();
 	void deleteArea();
+	double coutEfficiency();
 };

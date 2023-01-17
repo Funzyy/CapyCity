@@ -34,21 +34,21 @@ int WaterPlant::getWaterPrice() {
     for (auto& whichMat : WaterPlant().materials) {
         waterPrice += whichMat.second * whichMat.first.getPrice();
     }
-    return waterPrice;
+    return (waterPrice + WaterPlant().getPrice());
 }
 
 int WindPlant::getWindPrice() {
     for (auto& whichMat : WindPlant().materials) {
         windPrice += whichMat.second * whichMat.first.getPrice();
     }
-    return windPrice;
+    return (windPrice + WindPlant().getPrice());
 }
 
 int SolarPlant::getSolarPrice() {
     for (auto& whichMat : SolarPlant().materials) {
         solarPrice += whichMat.second * whichMat.first.getPrice();
     }
-    return solarPrice;
+    return (solarPrice + SolarPlant().getPrice());
 }
 
 void Blueprint::buildBuilding() {
@@ -219,13 +219,38 @@ void Blueprint::deleteArea() {
     CapycitySim().menu();
 }
 
+double Blueprint::coutEfficiency() {
+    double index = 0;
+
+    for (int i = 0; i < length; i++) {
+        for (int j = 0; j < width; j++) {
+            if (Area[i][j] == nullptr) {
+                continue;
+            }
+            else {
+                if (Area[i][j]->getLabel() == 'W') {
+                    index += WaterPlant().getEfficiency() / (WaterPlant().getWaterPrice() * (length * width));
+                }
+                if (Area[i][j]->getLabel() == 'I') {
+                    index += WindPlant().getEfficiency() / (WindPlant().getWindPrice() * (length * width));
+                }
+                if (Area[i][j]->getLabel() == 'S') {
+                    index += SolarPlant().getEfficiency() / (SolarPlant().getSolarPrice() * (length * width));
+                }
+            }
+        }
+    }
+    return index;
+}
+
 void CapycitySim::menu() {
     cout << endl
         << "1 - Gebaeude setzen\n"
         << "2 - Bereich loeschen\n"
         << "3 - Aktueller Bauplan\n"
-        << "4 - Plan auswaehlen\n"
-        << "5 - Exit\n";
+        << "4 - Kennzahln\n"
+        << "5 - Plan auswaehlen\n"
+        << "6 - Exit\n";
     
     cin >> choice;
     
@@ -242,18 +267,21 @@ void CapycitySim::menu() {
             case 3:
                 //Print Blauplan
                 Blueprint().buildingPlan();
-                break;
+                break;            
             case 4:
-                planMenu();
+                cout << "Die Kennzahl betraegt: "<< Blueprint().coutEfficiency() << endl;
                 break;
             case 5:
+                planMenu();
+                break;
+            case 6:
                 //Beenden des Programms
                 cout << "Bye Bye";
                 exit(0);
             }
         }
     else {
-            cout << "Nur Zahlen von 1 - 5 erlaubt!\n";
+            cout << "Nur Zahlen von 1 - 6 erlaubt!\n";
             menu();     
     }
 };
@@ -304,7 +332,8 @@ void CapycitySim::planMenu() {
         << "3 Plaene verfuegbar: \n\n"
         << "1 - Plan 1\n"
         << "2 - Plan 2\n"
-        << "3 - Plan 3\n";
+        << "3 - Plan 3\n"
+        << "4 - Zurueck zum Hauptmenu\n";
 
     cin >> choice;
 
@@ -319,10 +348,12 @@ void CapycitySim::planMenu() {
         case 3:
             Area = Plan[2];
             break;
+        case 4:
+            CapycitySim().menu();
         }
     }
     else {
-        cout << "Nur Zahlen von 1 - 3 erlaubt!\n";
+        cout << "Nur Zahlen von 1 - 4 erlaubt!\n";
         planMenu();
     }
 };
