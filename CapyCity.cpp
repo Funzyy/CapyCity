@@ -10,7 +10,6 @@ int width;
 regex menuCheck("[1-4]");
 regex numberCheck("[[:digit:]]+");
 
-void menu();
 
 class Building {
 public:
