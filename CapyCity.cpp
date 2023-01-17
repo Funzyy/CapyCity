@@ -1,354 +1,274 @@
 #include <iostream>
 #include <string>
 #include <regex>
-#include <vector>
-#include <map>
+#include "CapycitySim.h"
 using namespace std;
 
-int length;
-int width;
-regex menuCheck("[1-4]");
-regex numberCheck("[[:digit:]]+");
+Building::Building() {
+    basePrice = 0;
+    label = '0';
+    efficiency = 0;
+}
 
+int Building::getPrice() const {
+    return basePrice;
+}
 
-class Building {
-public:
-    Building() {
-        basePrice = 0;
-        label = '0';        
+char Building::getLabel() const {
+    return label;
+}
+
+double Building::getEfficiency() const {
+    return efficiency;
+}
+
+string Material::getName() const {
+    return name;
+}
+
+int Material::getPrice() const {
+    return price;
+}
+
+int WaterPlant::getWaterPrice() {
+    for (auto& whichMat : WaterPlant().materials) {
+        waterPrice += whichMat.second * whichMat.first.getPrice();
+    }
+    return waterPrice;
+}
+
+int WindPlant::getWindPrice() {
+    for (auto& whichMat : WindPlant().materials) {
+        windPrice += whichMat.second * whichMat.first.getPrice();
+    }
+    return windPrice;
+}
+
+int SolarPlant::getSolarPrice() {
+    for (auto& whichMat : SolarPlant().materials) {
+        solarPrice += whichMat.second * whichMat.first.getPrice();
+    }
+    return solarPrice;
+}
+
+void Blueprint::buildBuilding() {
+    Building* buildingChoice = buildingMenu();
+
+    if (buildingChoice == nullptr) {
+        return;
     }
 
-    Building(
-        int basePrice,char label):basePrice(basePrice),label(label){}
+    int startX{ posX() };
+    int startY{ posY() };
+    int breite{ buildingWidth() };
+    int laenge{ buildingLength() };
 
-    int getPrice() const {
-        return basePrice;
-    }
-
-    char getLabel() const {
-        return label;
-    }
-
-protected:
-    int basePrice;
-    char label;
-    string name;
-};
-
-class Material {
-public:
-    Material(string name, int price) : name(name), price(price) {}
-    string getName() const {
-        return name;
-    }
-    int getPrice() const {
-        return price;
-    }
-private:
-    string name;
-    int price;
-};
-
-class Wood : public Material {
-public:
-    Wood() : Material("Holz", 25) {}
-};
-
-class Metal : public Material {
-public:
-    Metal() : Material("Metall", 15) {}
-};
-
-class Plastic : public Material {
-public:
-    Plastic() : Material("Kunststoff", 5) {}
-};
-
-struct MaterialComparator {
-    bool operator()(const Material& m1, const Material& m2) const {
-        return m1.getName() < m2.getName();
-    }
-};
-
-class WaterPlant : public Building {
-public:
-    WaterPlant() : Building(100, 'W') {
-        materials = map<Material, int, MaterialComparator>({
-            {Wood(), 2},
-            {Metal(), 2},
-            {Plastic(), 1}
-            });
-    }
-    map<Material, int, MaterialComparator> materials;
-};
-
-class WindPlant : public Building {
-public:
-    WindPlant() : Building(50, 'I') {
-        materials = map<Material, int, MaterialComparator>({
-            {Plastic(), 2},
-            {Metal(), 2}
-            });
-    }
-    map<Material, int, MaterialComparator> materials;
-};
-
-class SolarPlant : public Building {
-public:
-    SolarPlant() : Building(250, 'S') {
-        materials = map<Material, int, MaterialComparator>({
-        {Plastic(), 3},
-        {Metal(), 1}
-            });
-    }
-    map<Material, int, MaterialComparator> materials;
-};
-
-Building *buildingMenu();
-
-Building*** Area;
-
-int main(int argc, char **argv) {
-    
-    length = stoi(argv[1]);
-    width = stoi(argv[2]);
-
-    cout << "Willkommen in CapyCity!\n";
-
-    Area = new Building** [length];
-    for (int x = 0; x < length; x++) {
-        Area[x] = new Building*[width];
-        for (int y = 0; y < length; y++) {
-            Area[x][y] = nullptr;
+    for (int i = startX; i < startX + breite; i++) {
+        for (int j = startY; j < startY + laenge; j++) {
+            if ((startX + breite) > width || (startY + laenge) > length || Area[j][i] != nullptr) {
+                cout << "Flaeche schon belegt oder ausserhalb des Baubereichs!\n\n";
+                return buildBuilding();
+            }
+            else {
+                Area[j][i] = buildingChoice;
+            }
         }
-    }
-
-    while (true) {
-        menu();
     }
 }
 
-class CapycitySim {
-public:
-    void buildBuilding() {
-        Building* buildingChoice = buildingMenu();
+int Blueprint::posX() {
+    string startX;
 
-        if (buildingChoice == nullptr) {
-            return;
-        }
+    cout << "X Position eingeben: \n";
+    cin >> startX;
+    if (regex_match(startX, numberCheck) && stoi(startX) < length) {
+        return stoi(startX);
+    }
+    else {
+        cout << "Zahl zwischen 0 und " << (length - 1) << " eingeben\n";
+        return posX();
+    }
 
-        int startX{ posX() };
-        int startY{ posY() };
-        int breite{ buildingWidth() };
-        int laenge{ buildingLength() };
+}
 
-        for (int i = startX; i < startX + breite; i++) {
-            for (int j = startY; j < startY + laenge; j++) {
-                if ((startX + breite) > width || (startY + laenge) > length || Area[j][i] != nullptr) {
-                    cout << "Flaeche schon belegt oder ausserhalb des Baubereichs!\n\n";
-                    return buildBuilding();
+int Blueprint::posY() {
+    string startY;
+
+    cout << "Y Position eingeben: \n";
+    cin >> startY;
+    if (regex_match(startY, numberCheck) && stoi(startY) < width) {
+        return stoi(startY);
+    }
+    else {
+        cout << "Zahl zwischen 0 und " << (width - 1) << " eingeben\n";
+        return posY();
+    }
+
+}
+
+int Blueprint::buildingWidth() {
+    string breite;
+
+    cout << "Wie breit soll die Flaeche sein: \n";
+    cin >> breite;
+    if (regex_match(breite, numberCheck) && stoi(breite) > 0 && stoi(breite) <= width) {
+        return stoi(breite);
+    }
+    else {
+        cout << "Die Breite muss eine Zahl zwischen 1 und " << width << " sein!\n";
+        return buildingWidth();
+    }
+}
+
+int Blueprint::buildingLength() {
+    string laenge;
+
+    cout << "Wie lang soll die Flaeche sein: \n";
+    cin >> laenge;
+    if (regex_match(laenge, numberCheck) && stoi(laenge) > 0 && stoi(laenge) <= length) {
+        return stoi(laenge);
+    }
+    else {
+        cout << "Die Laenge muss eine Zahl zwischen 1 und " << length << " sein!\n";
+        return buildingLength();
+    }
+}
+
+void Blueprint::buildingPlan() {
+    int w = 0;
+    int i = 0;
+    int s = 0;
+
+    for (int x = 0; x < length; x++) {
+        for (int y = 0; y < width; y++) {
+            if (Area[x][y] == nullptr) {
+                cout << "[ ]";
+            }
+            else {
+                cout << "[" << Area[x][y]->getLabel() << "]";
+                if (Area[x][y]->getLabel() == 'W') {
+                    w++;
                 }
-                else {
-                    Area[j][i] = buildingChoice;
+                if (Area[x][y]->getLabel() == 'I') {
+                    i++;
+                }
+                if (Area[x][y]->getLabel() == 'S') {
+                    s++;
                 }
             }
         }
+        cout << endl;
     }
 
-    int posX() {
-        string startX;
+    // Wasserkraftwerk
+    cout << endl
+        << w << " Wassserkraftwerke\n"
+        << "Ein einzelnes Wasserkraftwerk kostet: " << WaterPlant().getPrice() << "$\n"
+        << "Fuer die Wasserkraftwerke werden benoetigt: ";
 
-        cout << "X Position eingeben: \n";
-        cin >> startX;
-        if (regex_match(startX, numberCheck) && stoi(startX) < length) {
-            return stoi(startX);
-        }
-        else {
-            cout << "Zahl zwischen 0 und " << (length - 1) << " eingeben\n";
-            return posX();
-        }
+    for (auto& whichMat : WaterPlant().materials) {
+        cout << "[" << w * whichMat.second << " " << whichMat.first.getName() << "] ";
     }
 
-    int posY() {
-        string startY;
+    cout << endl
+        << "Die Gesamtkosten der Wasserkraftwerke betragen:  "
+        << w * (WaterPlant().getPrice() + WaterPlant().getWaterPrice()) << "$\n";
 
-        cout << "Y Position eingeben: \n";
-        cin >> startY;
-        if (regex_match(startY, numberCheck) && stoi(startY) < width) {
-            return stoi(startY);
-        }
-        else {
-            cout << "Zahl zwischen 0 und " << (width - 1) << " eingeben\n";
-            return posY();
-        }
+    // Windkraftwerk
+    cout << endl
+        << i << " Windkraftwerke\n"
+        << "Ein einzelnes Windkraftwerk kostet: " << WindPlant().getPrice() << "$\n"
+        << "Fuer die Windkraftwerk werden benoetigt: ";
+
+    for (auto& whichMat : WindPlant().materials) {
+        cout << "[" << i * whichMat.second << " " << whichMat.first.getName() << "] ";
     }
 
-    int buildingWidth() {
-        string breite;
+    cout << endl
+        << "Die Gesamtkosten der Wasserkraftwerke betragen:  "
+        << i * (WindPlant().getPrice() + WindPlant().getWindPrice()) << "$\n";
 
-        cout << "Wie breit soll die Flaeche sein: \n";
-        cin >> breite;
-        if (regex_match(breite, numberCheck) && stoi(breite) > 0 && stoi(breite) <= width) {
-            return stoi(breite);
-        }
-        else {
-            cout << "Die Breite muss eine Zahl zwischen 1 und " << width << " sein!\n";
-            return buildingWidth();
-        }
+    // Solarpanel
+    cout << endl
+        << s << " Solarpanel\n"
+        << "Ein einzelnes Solarpanel kostet: " << SolarPlant().getPrice() << "$\n"
+        << "Fuer die Solarpanel werden benoetigt: ";
+
+    for (auto& whichMat : SolarPlant().materials) {
+        cout << "[" << s * whichMat.second << " " << whichMat.first.getName() << "] ";
     }
 
-    int buildingLength() {
-        string laenge;
+    cout << endl
+        << "Die Gesamtkosten der Wasserkraftwerke betragen:  "
+        << s * (SolarPlant().getPrice() + SolarPlant().getSolarPrice()) << "$\n";
 
-        cout << "Wie lang soll die Flaeche sein: \n";
-        cin >> laenge;
-        if (regex_match(laenge, numberCheck) && stoi(laenge) > 0 && stoi(laenge) <= length) {
-            return stoi(laenge);
-        }
-        else {
-            cout << "Die Laenge muss eine Zahl zwischen 1 und " << length << " sein!\n";
-            return buildingLength();
+    CapycitySim().menu();
+}
+
+void Blueprint::deleteArea() {
+    int startX{ posX() };
+    int startY{ posY() };
+    int breite{ buildingWidth() };
+    int laenge{ buildingLength() };
+
+    for (int i = startX; i < min(width, startX + breite); i++) {
+        for (int j = startY; j < min(length, startY + laenge); j++) {
+            Area[j][i] = nullptr;
         }
     }
+    CapycitySim().menu();
+}
 
-    void buildingPlan() {
-        int w = 0;
-        int i = 0;
-        int s = 0;
-
-        for (int x = 0; x < length; x++) {
-            for (int y = 0; y < width; y++) {
-                if (Area[x][y] == nullptr) {
-                    cout << "[ ]";
-                }
-                else {
-                    cout << "[" << Area[x][y]->getLabel() << "]";
-                    if (Area[x][y]-> getLabel() == 'W') {
-                        w++;
-                    }
-                    if (Area[x][y]->getLabel() == 'I') {
-                        i++;
-                    }
-                    if (Area[x][y]->getLabel() == 'S') {
-                        s++;
-                    }
-                }                
-            }
-            cout << endl;
-        }       
-
-        // Wasserkraftwerk
-        int matCost = 0;
-
-        cout << endl 
-            << w << " Wassserkraftwerke\n"
-            << "Ein einzelnes Wasserkraftwerk kostet: " << WaterPlant().getPrice() << "$\n"
-            << "Fuer die Wasserkraftwerke werden benoetigt: ";
-
-            for (auto& whichMat : WaterPlant().materials) {
-                cout << "[" << w * whichMat.second << " " << whichMat.first.getName() << "] ";
-                matCost += whichMat.second * whichMat.first.getPrice();
-            }            
-
-        cout << endl 
-            << "Die Gesamtkosten der Wasserkraftwerke betragen:  " 
-            << w * (WaterPlant().getPrice() + matCost) << "$\n";
-
-
-        // Windkraftwerk
-        matCost = 0;
-
-        cout << endl
-            << i << " Windkraftwerke\n"
-            << "Ein einzelnes Windkraftwerk kostet: " << WindPlant().getPrice() << "$\n"
-            << "Fuer die Windkraftwerk werden benoetigt: ";
-
-        for (auto& whichMat : WindPlant().materials) {
-            cout << "[" << i * whichMat.second << " " << whichMat.first.getName() << "] ";
-            matCost += whichMat.second * whichMat.first.getPrice();
-        }
-
-        cout << endl
-            << "Die Gesamtkosten der Wasserkraftwerke betragen:  "
-            << i * (WindPlant().getPrice() + matCost) << "$\n";
-
-        // Solarpanel
-        matCost = 0;
-
-        cout << endl
-            << s << " Solarpanel\n"
-            << "Ein einzelnes Solarpanel kostet: " << SolarPlant().getPrice() << "$\n"
-            << "Fuer die Solarpanel werden benoetigt: ";
-
-        for (auto& whichMat : SolarPlant().materials) {
-            cout << "[" << s * whichMat.second << " " << whichMat.first.getName() << "] ";
-            matCost += whichMat.second * whichMat.first.getPrice();
-        }
-
-        cout << endl
-            << "Die Gesamtkosten der Wasserkraftwerke betragen:  "
-            << s * (SolarPlant().getPrice() + matCost) << "$\n";
-
-        menu();
-    }
-
-    void deleteArea() {
-        int startX{ posX() };
-        int startY{ posY() };
-        int breite{ buildingWidth() };
-        int laenge{ buildingLength() };
-
-        for (int i = startX; i < min(width , startX + breite); i++) {
-            for (int j = startY; j < min(length, startY + laenge); j++) {
-                Area[j][i] = nullptr;                
-            }
-        }
-        menu();
-    }
-};
-
-void menu(){
-    string choice;
-
-    CapycitySim CapycitySim;
-
+void CapycitySim::menu() {
     cout << endl
         << "1 - Gebaeude setzen\n"
         << "2 - Bereich loeschen\n"
         << "3 - Aktueller Bauplan\n"
-        << "4 - Exit\n";
-
+        << "4 - Plan auswaehlen\n"
+        << "5 - Exit\n";
+    
     cin >> choice;
-
+    
     if (regex_match(choice, menuCheck)) {
         switch (stoi(choice)) {
         case 1:
             //Gebäude setzen    
-            CapycitySim.buildBuilding();
-            break;
-        case 2:
-            //Bereich löschen
-            CapycitySim.deleteArea();
-            break;
-        case 3:
-            //Print Blauplan
-            CapycitySim.buildingPlan();
-            break;
-        case 4:
-            //Beenden des Programms
-            cout << "Bye Bye";
-            exit(0);
+                Blueprint().buildBuilding();
+                break;
+            case 2:
+                //Bereich löschen
+                Blueprint().deleteArea();
+                break;
+            case 3:
+                //Print Blauplan
+                Blueprint().buildingPlan();
+                break;
+            case 4:
+                planMenu();
+                break;
+            case 5:
+                //Beenden des Programms
+                cout << "Bye Bye";
+                exit(0);
+            }
+        }
+    else {
+            cout << "Nur Zahlen von 1 - 5 erlaubt!\n";
+            menu();     
+    }
+};
+
+void CapycitySim::createArea(int argc, char** argv) {
+    Area = new Building** [length];
+    for (int x = 0; x < length; x++) {
+        Area[x] = new Building * [width];
+        for (int y = 0; y < length; y++) {
+            Area[x][y] = nullptr;
         }
     }
-    else {
-        cout << "Nur Zahlen von 1 - 4 erlaubt!\n";
-        menu();
-    } 
 }
 
 Building *buildingMenu() {
-    string buildingChoice;
-
     cout << "Welches Gebaeude soll gebaut werden?";
 
     cout << endl
@@ -356,10 +276,10 @@ Building *buildingMenu() {
         << "2 - Windkraftwerk\n"
         << "3 - Solarpanele\n"
         << "4 - Zurueck zum Hauptmenue\n";
-    cin >> buildingChoice;
+    cin >> choice;
 
-    if (regex_match(buildingChoice, menuCheck)) {
-        switch (stoi(buildingChoice)) {
+    if (regex_match(choice, buildingCheck)) {
+        switch (stoi(choice)) {
         case 1:
             return new WaterPlant();
             break;
@@ -376,5 +296,53 @@ Building *buildingMenu() {
     else {
         cout << "Nur Zahlen von 1 - 4 erlaubt!\n";
         return buildingMenu();
+    }
+}
+
+void CapycitySim::planMenu() {
+    cout << endl
+        << "3 Plaene verfuegbar: \n\n"
+        << "1 - Plan 1\n"
+        << "2 - Plan 2\n"
+        << "3 - Plan 3\n";
+
+    cin >> choice;
+
+    if (regex_match(choice, planMenuCheck)) {
+        switch (stoi(choice)) {
+        case 1:
+            Area = Plan[0];
+            break;
+        case 2:
+            Area = Plan[1];
+            break;
+        case 3:
+            Area = Plan[2];
+            break;
+        }
+    }
+    else {
+        cout << "Nur Zahlen von 1 - 3 erlaubt!\n";
+        planMenu();
+    }
+};
+
+int main(int argc, char** argv) {
+    length = stoi(argv[1]);
+    width = stoi(argv[2]);
+
+    cout << "Willkommen in CapyCity!\n";
+
+    CapycitySim().createArea(argc, argv);
+
+    for (int iterate = 0; iterate < 3; iterate++) {
+        Plan[iterate] = Area;
+        CapycitySim().createArea(argc, argv);    }
+
+    Area = Plan[0];
+
+    CapycitySim CapycitySim;
+    while (true) {
+        CapycitySim.menu();
     }
 }
