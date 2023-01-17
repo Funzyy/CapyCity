@@ -65,7 +65,7 @@ void Blueprint::buildBuilding() {
 
     for (int i = startX; i < startX + breite; i++) {
         for (int j = startY; j < startY + laenge; j++) {
-            if ((startX + breite) > width || (startY + laenge) > length || Area[j][i] != nullptr) {
+            if ((startX + breite) > length || (startY + laenge) > width || Area[j][i] != nullptr) {
                 cout << "Flaeche schon belegt oder ausserhalb des Baubereichs!\n\n";
                 return buildBuilding();
             }
@@ -81,14 +81,13 @@ int Blueprint::posX() {
 
     cout << "X Position eingeben: \n";
     cin >> startX;
-    if (regex_match(startX, numberCheck) && stoi(startX) < length) {
+    if (regex_match(startX, numberCheck) && stoi(startX) < width) {
         return stoi(startX);
     }
     else {
-        cout << "Zahl zwischen 0 und " << (length - 1) << " eingeben\n";
+        cout << "Zahl zwischen 0 und " << (width - 1) << " eingeben\n";
         return posX();
     }
-
 }
 
 int Blueprint::posY() {
@@ -96,14 +95,13 @@ int Blueprint::posY() {
 
     cout << "Y Position eingeben: \n";
     cin >> startY;
-    if (regex_match(startY, numberCheck) && stoi(startY) < width) {
+    if (regex_match(startY, numberCheck) && stoi(startY) < length) {
         return stoi(startY);
     }
     else {
-        cout << "Zahl zwischen 0 und " << (width - 1) << " eingeben\n";
+        cout << "Zahl zwischen 0 und " << (length - 1) << " eingeben\n";
         return posY();
     }
-
 }
 
 int Blueprint::buildingWidth() {
@@ -111,11 +109,11 @@ int Blueprint::buildingWidth() {
 
     cout << "Wie breit soll die Flaeche sein: \n";
     cin >> breite;
-    if (regex_match(breite, numberCheck) && stoi(breite) > 0 && stoi(breite) <= width) {
+    if (regex_match(breite, numberCheck) && stoi(breite) > 0 && stoi(breite) <= length) {
         return stoi(breite);
     }
     else {
-        cout << "Die Breite muss eine Zahl zwischen 1 und " << width << " sein!\n";
+        cout << "Die Breite muss eine Zahl zwischen 1 und " << length << " sein!\n";
         return buildingWidth();
     }
 }
@@ -125,11 +123,11 @@ int Blueprint::buildingLength() {
 
     cout << "Wie lang soll die Flaeche sein: \n";
     cin >> laenge;
-    if (regex_match(laenge, numberCheck) && stoi(laenge) > 0 && stoi(laenge) <= length) {
+    if (regex_match(laenge, numberCheck) && stoi(laenge) > 0 && stoi(laenge) <= width) {
         return stoi(laenge);
     }
     else {
-        cout << "Die Laenge muss eine Zahl zwischen 1 und " << length << " sein!\n";
+        cout << "Die Laenge muss eine Zahl zwischen 1 und " << width << " sein!\n";
         return buildingLength();
     }
 }
@@ -139,8 +137,8 @@ void Blueprint::buildingPlan() {
     int i = 0;
     int s = 0;
 
-    for (int x = 0; x < length; x++) {
-        for (int y = 0; y < width; y++) {
+    for (int x = 0; x < width; x++) {
+        for (int y = 0; y < length; y++) {
             if (Area[x][y] == nullptr) {
                 cout << "[ ]";
             }
@@ -211,8 +209,8 @@ void Blueprint::deleteArea() {
     int breite{ buildingWidth() };
     int laenge{ buildingLength() };
 
-    for (int i = startX; i < min(width, startX + breite); i++) {
-        for (int j = startY; j < min(length, startY + laenge); j++) {
+    for (int i = startX; i < min(length, startX + breite); i++) {
+        for (int j = startY; j < min(width, startY + laenge); j++) {
             Area[j][i] = nullptr;
         }
     }
@@ -222,20 +220,20 @@ void Blueprint::deleteArea() {
 double Blueprint::coutEfficiency() {
     double index = 0;
 
-    for (int i = 0; i < length; i++) {
-        for (int j = 0; j < width; j++) {
+    for (int i = 0; i < width; i++) {
+        for (int j = 0; j < length; j++) {
             if (Area[i][j] == nullptr) {
                 continue;
             }
             else {
                 if (Area[i][j]->getLabel() == 'W') {
-                    index += WaterPlant().getEfficiency() / (WaterPlant().getWaterPrice() * (length * width));
+                    index += WaterPlant().getEfficiency() / (WaterPlant().getWaterPrice() * (width * length));
                 }
                 if (Area[i][j]->getLabel() == 'I') {
-                    index += WindPlant().getEfficiency() / (WindPlant().getWindPrice() * (length * width));
+                    index += WindPlant().getEfficiency() / (WindPlant().getWindPrice() * (width * length));
                 }
                 if (Area[i][j]->getLabel() == 'S') {
-                    index += SolarPlant().getEfficiency() / (SolarPlant().getSolarPrice() * (length * width));
+                    index += SolarPlant().getEfficiency() / (SolarPlant().getSolarPrice() * (width * length));
                 }
             }
         }
@@ -287,9 +285,9 @@ void CapycitySim::menu() {
 };
 
 void CapycitySim::createArea(int argc, char** argv) {
-    Area = new Building** [length];
-    for (int x = 0; x < length; x++) {
-        Area[x] = new Building * [width];
+    Area = new Building** [width];
+    for (int x = 0; x < width; x++) {
+        Area[x] = new Building * [length];
         for (int y = 0; y < length; y++) {
             Area[x][y] = nullptr;
         }
@@ -359,8 +357,8 @@ void CapycitySim::planMenu() {
 };
 
 int main(int argc, char** argv) {
-    length = stoi(argv[1]);
-    width = stoi(argv[2]);
+    width = stoi(argv[1]);
+    length = stoi(argv[2]);
 
     cout << "Willkommen in CapyCity!\n";
 
@@ -371,7 +369,7 @@ int main(int argc, char** argv) {
         CapycitySim().createArea(argc, argv);    }
 
     Area = Plan[0];
-
+    
     CapycitySim CapycitySim;
     while (true) {
         CapycitySim.menu();

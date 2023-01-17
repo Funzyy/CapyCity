@@ -2,8 +2,8 @@
 #include <map>
 using namespace std;
 
-int length;
 int width;
+int length;
 string choice;
 regex planMenuCheck("[1-4]");
 regex buildingCheck("[1-4]");
@@ -129,4 +129,25 @@ public:
 	void buildingPlan();
 	void deleteArea();
 	double coutEfficiency();
+};
+
+class IdenticalCheck {
+public:
+	//				a = Plan[0]	b = Plan[1]
+	bool operator()(Building*** a, Building*** b) {
+		for (int i = 0; i < width; i++) {
+			for (int j = 0; j < length; j++) {
+				if (a[i][j] != nullptr && b[i][j] != nullptr) {
+					if (a[i][j]->getLabel() != b[i][j]->getLabel()) {
+						return false;
+					}					
+				}
+				if ((a[i][j] == nullptr && b[i][j] != nullptr) 
+					||(a[i][j] != nullptr && b[i][j] == nullptr) ){
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 };
