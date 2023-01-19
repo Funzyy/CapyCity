@@ -2,6 +2,7 @@
 #include <string>
 #include <regex>
 #include "CapycitySim.h"
+#include "vector"
 using namespace std;
 
 Building::Building() {
@@ -200,7 +201,7 @@ void Blueprint::buildingPlan() {
         << "Die Gesamtkosten der Wasserkraftwerke betragen:  "
         << s * (SolarPlant().getPrice() + SolarPlant().getSolarPrice()) << "$\n";
 
-    cout << endl << "Der Plan hat die Kennzahl: " <<  Blueprint().coutEfficiency() << endl;
+    cout << endl << "Der Plan hat die Kennzahl: " <<  Blueprint().coutEfficiency(Plan[currentPlan]) << endl;
 
     CapycitySim().menu();
 }
@@ -219,7 +220,7 @@ void Blueprint::deleteArea() {
     CapycitySim().menu();
 }
 
-double Blueprint::coutEfficiency() {
+double Blueprint::coutEfficiency(Building*** Area) {
     double index = 0;
 
     for (int i = 0; i < width; i++) {
@@ -245,37 +246,33 @@ double Blueprint::coutEfficiency() {
 
 void CapycitySim::menu() {
     cout << endl
-        << "1 - Gebaeude setzen\n"
-        << "2 - Bereich loeschen\n"
-        << "3 - Aktueller Bauplan\n"
-        << "4 - Kennzahln\n"
-        << "5 - Plan auswaehlen\n"
-        << "6 - Exit\n";
+        << "    1 - Gebaeude setzen\n"
+        << "    2 - Bereich loeschen\n"
+        << "    3 - Aktueller Bauplan\n"
+        << "    4 - Kennzahl\n"
+        << "    5 - Plan Menu\n"
+        << "    6 - Exit\n";
     
     cin >> choice;
     
     if (regex_match(choice, menuCheck)) {
         switch (stoi(choice)) {
-        case 1:
-            //Gebäude setzen    
+            case 1:
                 Blueprint().buildBuilding();
                 break;
-            case 2:
-                //Bereich löschen
+            case 2:                
                 Blueprint().deleteArea();
                 break;
-            case 3:
-                //Print Blauplan
+            case 3:                
                 Blueprint().buildingPlan();
                 break;            
             case 4:
-                cout << "Die Kennzahl betraegt: "<< Blueprint().coutEfficiency() << endl;
+                cout << "Die Kennzahl betraegt: "<< Blueprint().coutEfficiency(Plan[currentPlan]) << endl;
                 break;
             case 5:
                 planMenu();
                 break;
-            case 6:
-                //Beenden des Programms
+            case 6:                
                 cout << "Bye Bye";
                 exit(0);
             }
@@ -286,10 +283,10 @@ void CapycitySim::menu() {
     }
 };
 
-void CapycitySim::createArea(int argc, char** argv) {
+void CapycitySim::createArea() {
     Area = new Building** [width];
     for (int x = 0; x < width; x++) {
-        Area[x] = new Building * [length];
+        Area[x] = new Building* [length];
         for (int y = 0; y < length; y++) {
             Area[x][y] = nullptr;
         }
@@ -297,13 +294,13 @@ void CapycitySim::createArea(int argc, char** argv) {
 }
 
 Building *buildingMenu() {
-    cout << "Welches Gebaeude soll gebaut werden?";
+    cout << "Welches Gebaeude soll gebaut werden?\n";
 
     cout << endl
-        << "1 - Wasserkraftwerk\n"
-        << "2 - Windkraftwerk\n"
-        << "3 - Solarpanele\n"
-        << "4 - Zurueck zum Hauptmenue\n";
+        << "    1 - Wasserkraftwerk\n"
+        << "    2 - Windkraftwerk\n"
+        << "    3 - Solarpanele\n"
+        << "    4 - Zurueck zum Hauptmenue\n";
     cin >> choice;
 
     if (regex_match(choice, buildingCheck)) {
@@ -328,83 +325,84 @@ Building *buildingMenu() {
 }
 
 void CapycitySim::planMenu() {
+    CapycitySim CapyCitySim;
+
     cout << endl
-        << "3 Plaene verfuegbar: \n\n"
-        << "1 - Plan 1\n"
-        << "2 - Plan 2\n"
-        << "3 - Plan 3\n"
-        << "4 - Zurueck zum Hauptmenu\n";
+        << "    1 - Neuen Plan erstellen\n"
+        << "    2 - Plan auswaehlen\n"
+        << "    3 - Zurueck zum Hauptmenu\n";
 
     cin >> choice;
 
-    if (regex_match(choice, planMenuCheck)) {
-        for (int i = 0; i < 3; i++ ) {
-            if (i == currentPlan) {
-                break;
-            }
-            if (Blueprint().operator()(Plan[currentPlan], Plan[i]) != false) {
-                cout << "Plan ist identisch mit Plan " << (i + 1) << "!\n   Plan wird geloescht!\n" <<  endl;
-                for (int x = 0; x < width; x++) {
-                    for (int y = 0; y < length; y++) {
-                        Area[x][y] = nullptr;
-                    }
-                }
-                break;
-            }
-        }
-
+    if (regex_match(choice, planChoiceCheck)) {
         switch (stoi(choice)) {
         case 1:
-            if (currentPlan == 0 && stoi(choice) == 1) {
-                cout << endl << "Sie befinden sich schon in Plan 1!\n";
-                break;
-            }
-            cout << "Wechsel zu Plan #1\n";
-            currentPlan = 0;
-            Area = Plan[0];  
+            Plan.push_back(Area);
+            planCounter += 1;
+            currentPlan = planCounter;
+            //Area = Plan[planCounter];
+            CapycitySim().createArea();
+            cout << endl << "Neuen Plan erstellt und als bearbeitenden Plan ausgewaehlt\n";
             break;
         case 2:
-            if (currentPlan == 1 && stoi(choice) == 2) {
-                cout << endl << "Sie befinden sich schon in Plan 2!\n";
-                break;
-            }
-            cout << "Wechsel zu Plan #2\n";
-            currentPlan = 1;
-            Area = Plan[1];
-            break;
-        case 3:
-            if (currentPlan == 2 && stoi(choice) == 3) {
-                cout << endl <<"Sie befinden sich schon in Plan 3!\n";
-                break;
-            }
-            cout << "Wechsel zu Plan #3\n";
-            currentPlan = 2;
-            Area = Plan[2];
-            break;
-        case 4:
-            CapycitySim().menu();
+            return CapyCitySim.planChoice();
+        default:
+            return menu();
         }
     }
     else {
-        cout << "Nur Zahlen von 1 - 4 erlaubt!\n";
+        cout << "Nur Zahlen von 1 - 3 erlaubt!\n";
         planMenu();
     }
 };
+
+void CapycitySim::planChoice() {
+    cout << "    " << Plan.size() << " Plaene verfuegbar : \n\n"
+        << "    1 - Erster Plan\n"
+        << "    2 - Naechster Plan\n"
+        << "    3 - Vorheriger Plan\n"
+        << "    4 - Letzter Plan\n"
+        << "    5 - Auswahl bestaetigen\n";
+
+    cin >> choice;
+
+    if (regex_match(choice, planChoiceCheck)) {
+        switch (stoi(choice)) {
+        case 1:
+            cout << "   Plan 1" << endl;
+            Area = Plan.front();
+            currentPlan = 0;
+            break;
+        case 2:
+            currentPlan += 1;
+            cout << "   Plan " << Plan[currentPlan];
+            break;
+        case 3:
+            currentPlan -= 1;
+            cout << "   Plan " << Plan[currentPlan];
+            break;
+        case 4:
+            cout << "   Plan " << Plan.size() - 1 << endl;
+            Area = Plan.back();
+            currentPlan = planCounter;
+            break;
+        }
+    }
+    else {
+        cout << "   Nur Zahlen von 1 - 4 erlaubt!\n";
+        planChoice();
+    }
+}
 
 int main(int argc, char** argv) {
     width = stoi(argv[1]);
     length = stoi(argv[2]);
 
-    cout << "Willkommen in CapyCity!\n";
+    cout << "    Willkommen in CapyCity!\n";
 
-    CapycitySim().createArea(argc, argv);
+    CapycitySim().createArea();
 
-    for (int i = 0; i < 3; i++) {
-        Plan[i] = Area;
-        CapycitySim().createArea(argc, argv);    }
-
-    Area = Plan[0];
-    currentPlan = 0;
+    Plan.push_back(Area);
       
     CapycitySim CapycitySim;
     while (true) {

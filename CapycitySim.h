@@ -1,12 +1,15 @@
 #include <string>
 #include <map>
+#include <vector>
 using namespace std;
 
 int width;
 int length;
-int currentPlan;
+int planCounter = 0;
+int currentPlan = 0;
 string choice;
-regex planMenuCheck("[1-4]");
+regex planMenuCheck("[1-3]");
+regex planChoiceCheck("[1-5]");
 regex buildingCheck("[1-4]");
 regex menuCheck("[1-6]");
 regex numberCheck("[[:digit:]]+");
@@ -30,7 +33,7 @@ Building* buildingMenu();
 
 Building*** Area;
 
-Building*** Plan[3];
+vector <Building***> Plan;
 
 class Material {
 public:
@@ -116,8 +119,9 @@ private:
 class CapycitySim {
 public:
 	void menu();
-	void createArea(int argc, char** argv);
+	void createArea();
 	void planMenu();
+	void planChoice();
 };
 
 class Blueprint {
@@ -129,7 +133,7 @@ public:
 	int buildingLength();
 	void buildingPlan();
 	void deleteArea();
-	double coutEfficiency();
+	double coutEfficiency(Building*** Area);
 	bool operator()(Building*** a, Building*** b) {
 		for (int i = 0; i < width; i++) {
 			for (int j = 0; j < length; j++) {
