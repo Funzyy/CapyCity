@@ -200,6 +200,8 @@ void Blueprint::buildingPlan() {
         << "Die Gesamtkosten der Wasserkraftwerke betragen:  "
         << s * (SolarPlant().getPrice() + SolarPlant().getSolarPrice()) << "$\n";
 
+    cout << endl << "Der Plan hat die Kennzahl: " <<  Blueprint().coutEfficiency() << endl;
+
     CapycitySim().menu();
 }
 
@@ -336,14 +338,47 @@ void CapycitySim::planMenu() {
     cin >> choice;
 
     if (regex_match(choice, planMenuCheck)) {
+        for (int i = 0; i < 3; i++ ) {
+            if (i == currentPlan) {
+                break;
+            }
+            if (Blueprint().operator()(Plan[currentPlan], Plan[i]) != false) {
+                cout << "Plan ist identisch mit Plan " << (i + 1) << "!\n   Plan wird geloescht!\n" <<  endl;
+                for (int x = 0; x < width; x++) {
+                    for (int y = 0; y < length; y++) {
+                        Area[x][y] = nullptr;
+                    }
+                }
+                break;
+            }
+        }
+
         switch (stoi(choice)) {
         case 1:
-            Area = Plan[0];
+            if (currentPlan == 0 && stoi(choice) == 1) {
+                cout << endl << "Sie befinden sich schon in Plan 1!\n";
+                break;
+            }
+            cout << "Wechsel zu Plan #1\n";
+            currentPlan = 0;
+            Area = Plan[0];  
             break;
         case 2:
+            if (currentPlan == 1 && stoi(choice) == 2) {
+                cout << endl << "Sie befinden sich schon in Plan 2!\n";
+                break;
+            }
+            cout << "Wechsel zu Plan #2\n";
+            currentPlan = 1;
             Area = Plan[1];
             break;
         case 3:
+            if (currentPlan == 2 && stoi(choice) == 3) {
+                cout << endl <<"Sie befinden sich schon in Plan 3!\n";
+                break;
+            }
+            cout << "Wechsel zu Plan #3\n";
+            currentPlan = 2;
             Area = Plan[2];
             break;
         case 4:
@@ -364,12 +399,13 @@ int main(int argc, char** argv) {
 
     CapycitySim().createArea(argc, argv);
 
-    for (int iterate = 0; iterate < 3; iterate++) {
-        Plan[iterate] = Area;
+    for (int i = 0; i < 3; i++) {
+        Plan[i] = Area;
         CapycitySim().createArea(argc, argv);    }
 
     Area = Plan[0];
-    
+    currentPlan = 0;
+      
     CapycitySim CapycitySim;
     while (true) {
         CapycitySim.menu();
