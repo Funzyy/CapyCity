@@ -332,7 +332,7 @@ Building *buildingMenu() {
         }
     }
     else {
-        cout << "Nur Zahlen von 1 - 4 erlaubt!\n";
+        cout << "   Nur Zahlen von 1 - 4 erlaubt!\n";
         return buildingMenu();
     }
 }
@@ -347,7 +347,7 @@ void CapycitySim::planMenu() {
 
     cin >> choice;
 
-    if (regex_match(choice, planChoiceCheck)) {
+    if (regex_match(choice, planMenuCheck)) {
         switch (stoi(choice)) {
         case 1:
             for (int i = 0; i < Plan.size(); i++) {
@@ -375,7 +375,7 @@ void CapycitySim::planMenu() {
         }
     }
     else {
-        cout << "Nur Zahlen von 1 - 3 erlaubt!\n";
+        cout << "   Nur Zahlen von 1 - 3 erlaubt!\n";
         planMenu();
     }
 };
