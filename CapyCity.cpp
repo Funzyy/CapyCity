@@ -222,6 +222,9 @@ void Blueprint::deleteArea() {
 
 double Blueprint::coutEfficiency(Building*** Area) {
     double index = 0;
+    WaterPlant WaterPlant;
+    WindPlant WindPlant;
+    SolarPlant SolarPlant;
 
     for (int i = 0; i < width; i++) {
         for (int j = 0; j < length; j++) {
@@ -230,13 +233,13 @@ double Blueprint::coutEfficiency(Building*** Area) {
             }
             else {
                 if (Area[i][j]->getLabel() == 'W') {
-                    index += WaterPlant().getEfficiency() / (WaterPlant().getWaterPrice() * (width * length));
+                    index += WaterPlant.getEfficiency() / (WaterPlant.getWaterPrice() * (width * length));
                 }
                 if (Area[i][j]->getLabel() == 'I') {
-                    index += WindPlant().getEfficiency() / (WindPlant().getWindPrice() * (width * length));
+                    index += WindPlant.getEfficiency() / (WindPlant.getWindPrice() * (width * length));
                 }
                 if (Area[i][j]->getLabel() == 'S') {
-                    index += SolarPlant().getEfficiency() / (SolarPlant().getSolarPrice() * (width * length));
+                    index += SolarPlant.getEfficiency() / (SolarPlant.getSolarPrice() * (width * length));
                 }
             }
         }
@@ -251,6 +254,8 @@ void Blueprint::sortedCout() {
 }
 
 void CapycitySim::menu() {
+    Blueprint blue;
+
     cout << endl
         << "    1 - Gebaeude setzen\n"
         << "    2 - Bereich loeschen\n"
@@ -265,24 +270,24 @@ void CapycitySim::menu() {
     if (regex_match(choice, menuCheck)) {
         switch (stoi(choice)) {
             case 1:
-                Blueprint().buildBuilding();
+                blue.buildBuilding();
                 break;
             case 2:                
-                Blueprint().deleteArea();
+                blue.deleteArea();
                 break;
             case 3:                
-                Blueprint().buildingPlan();
+                blue.buildingPlan();
                 break;            
             case 4:
-                cout << "Die Kennzahl betraegt: "<< Blueprint().coutEfficiency(Plan[currentPlan]) << endl;
+                cout << "Die Kennzahl betraegt: "<< blue.coutEfficiency(Plan[currentPlan]) << endl;
                 break;
             case 5:
                 planMenu();
                 break;
             case 6:
-                Blueprint().sortedCout();
+                blue.sortedCout();
                 for (int i = 0; i < Plan.size(); i++) {
-                    cout << "   Plan " << i + 1 << " Kennzahl " << Blueprint().coutEfficiency(Plan[i]) << endl; 
+                    cout << "   Plan " << i + 1 << " Kennzahl " << blue.coutEfficiency(Plan[i]) << endl; 
                 }
                 break;                
             case 7:                
@@ -355,8 +360,8 @@ void CapycitySim::planMenu() {
                     break;
                 }
                 if (Blueprint().operator()(Plan[currentPlan], Plan[i]) != false) {
-                    cout << "Plan " << currentPlan + 1 << " identisch mit Plan " << i + 1 << "!\n"
-                        << "Plan " << currentPlan + 1 << " wird geloescht!\n";
+                    cout << "    Plan " << currentPlan + 1 << " identisch mit Plan " << i + 1 << "!\n"
+                        << "    Plan " << currentPlan + 1 << " wird geloescht!\n";
                         Plan.pop_back();
                         planCounter -= 1;
                         break;
@@ -381,8 +386,10 @@ void CapycitySim::planMenu() {
 };
 
 void CapycitySim::planChoice() {
+    Blueprint blue;
+
     cout << "    " << Plan.size() << " Plaene verfuegbar\n"
-        << "    Momentaner Plan: " << currentPlan + 1 << " Kennzahl: " << Blueprint().coutEfficiency(Plan[currentPlan]) << "\n\n"
+        << "    Momentaner Plan: " << currentPlan + 1 << " Kennzahl: " << blue.coutEfficiency(Plan[currentPlan]) << "\n\n"
         << "    1 - Erster Plan\n"
         << "    2 - Naechster Plan\n"
         << "    3 - Vorheriger Plan\n"
@@ -396,7 +403,7 @@ void CapycitySim::planChoice() {
         case 1:
             Area = Plan.front();
             currentPlan = 0;
-            cout << "    Plan 1" << " Kennzahl: " << Blueprint().coutEfficiency(Plan[currentPlan]) << endl << endl;
+            cout << "    Plan 1" << " Kennzahl: " << blue.coutEfficiency(Plan[currentPlan]) << endl << endl;
             planChoice();
             break;
         case 2:
@@ -407,7 +414,7 @@ void CapycitySim::planChoice() {
                 currentPlan += 1;
             }
             Area = Plan[currentPlan];
-            cout << "    Plan " << currentPlan + 1 << " Kennzahl: " << Blueprint().coutEfficiency(Plan[currentPlan]) << endl << endl;
+            cout << "    Plan " << currentPlan + 1 << " Kennzahl: " << blue.coutEfficiency(Plan[currentPlan]) << endl << endl;
             planChoice();
             break;
         case 3:
@@ -418,13 +425,13 @@ void CapycitySim::planChoice() {
                 currentPlan -= 1;
             }
             Area = Plan[currentPlan];
-            cout << "    Plan " << currentPlan - 1 << " Kennzahl: " << Blueprint().coutEfficiency(Plan[currentPlan]) << endl << endl;
+            cout << "    Plan " << currentPlan - 1 << " Kennzahl: " << blue.coutEfficiency(Plan[currentPlan]) << endl << endl;
             planChoice();
             break;
         case 4:            
             Area = Plan.back();
             currentPlan = planCounter;
-            cout << "    Plan " << Plan.size() << " Kennzahl: " << Blueprint().coutEfficiency(Plan[currentPlan]) << endl << endl;
+            cout << "    Plan " << Plan.size() << " Kennzahl: " << blue.coutEfficiency(Plan[currentPlan]) << endl << endl;
             planChoice();
             break;
         case 5:
