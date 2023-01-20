@@ -282,7 +282,7 @@ void CapycitySim::menu() {
             case 6:
                 Blueprint().sortedCout();
                 for (int i = 0; i < Plan.size(); i++) {
-                    cout << "   Plan " << i + 1 << " Kennzahl " << Blueprint().coutEfficiency(Plan[i]) << endl; 
+                    cout << "Plan " << i + 1 << " Kennzahl " << Blueprint().coutEfficiency(Plan[i]) << endl; 
                 }
                 break;                
             case 7:                

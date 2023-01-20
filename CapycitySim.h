@@ -11,7 +11,7 @@ string choice;
 regex planMenuCheck("[1-3]");
 regex planChoiceCheck("[1-5]");
 regex buildingCheck("[1-4]");
-regex menuCheck("[1-6]");
+regex menuCheck("[1-7]");
 regex numberCheck("[[:digit:]]+");
 
 class Building {
@@ -133,11 +133,11 @@ public:
 	int buildingLength();
 	void buildingPlan();
 	void deleteArea();
+	void sortedCout();
 	double coutEfficiency(Building*** Area);
 	bool operator()(Building*** a, Building*** b) {
 		for (int i = 0; i < width; i++) {
 			for (int j = 0; j < length; j++) {
-
 				if (a[i][j] != nullptr && b[i][j] != nullptr) {
 					if (a[i][j]->getLabel() != b[i][j]->getLabel()) {
 						return false;
